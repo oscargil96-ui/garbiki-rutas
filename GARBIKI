@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Garbiki — Rutas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;min-height:100vh}
+
+/* TOP BAR */
+.top-bar{background:#2E4057;color:#fff;padding:14px 16px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.25)}
+.top-bar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.top-bar h1{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.admin-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.day-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.day-tabs::-webkit-scrollbar{display:none}
+.day-tab{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:rgba(255,255,255,0.15);color:#fff;transition:all 0.15s}
+.day-tab.active{background:#fff;color:#2E4057}
+
+/* REP TABS */
+.rep-tabs{display:flex;gap:10px;padding:12px 16px 0}
+.rep-tab{flex:1;padding:10px;border-radius:10px;font-size:14px;font-weight:600;border:1.5px solid #ddd;cursor:pointer;background:#fff;color:#888;text-align:center;transition:all 0.15s}
+.rep-tab.active.wilson{background:#2E4057;color:#fff;border-color:#2E4057}
+.rep-tab.active.juan{background:#1A6B3A;color:#fff;border-color:#1A6B3A}
+
+/* SUMMARY */
+.summary-bar{display:flex;gap:8px;padding:10px 16px}
+.summary-card{flex:1;background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:10px 8px;text-align:center}
+.summary-card .num{font-size:22px;font-weight:700;color:#2E4057}
+.summary-card .lbl{font-size:11px;color:#888;margin-top:2px}
+
+/* NOTES */
+.notes-box{margin:0 16px 8px;background:#FFF3CD;border-radius:10px;padding:10px 12px;font-size:13px;color:#856404;border:1px solid #F0C14B;display:none;line-height:1.4}
+.notes-box.visible{display:block}
+
+/* STOP LIST */
+.stop-list{padding:0 16px 80px;display:flex;flex-direction:column;gap:10px}
+.stop-card{background:#fff;border-radius:14px;border:1.5px solid #e8e8e8;padding:14px;transition:all 0.2s}
+.stop-card.done{border-color:#27AE60;opacity:0.8}
+.stop-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.stop-num{width:30px;height:30px;border-radius:50%;background:#2E4057;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rep-juan .stop-num{background:#1A6B3A}
+.stop-card.done .stop-num{background:#27AE60}
+.stop-info{flex:1;min-width:0}
+.stop-name{font-size:15px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stop-zone{font-size:12px;color:#888;margin-top:2px}
+.er-badge{flex-shrink:0;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:#FADBD8;color:#922B21}
+.stop-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.input-group label{display:block;font-size:12px;color:#666;margin-bottom:5px;font-weight:500}
+.input-group select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;color:#1a1a1a;font-size:15px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.check-btn{width:100%;padding:13px;border-radius:10px;border:1.5px solid #27AE60;background:transparent;color:#27AE60;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s}
+.check-btn:active{transform:scale(0.97)}
+.stop-card.done .check-btn{background:#27AE60;color:#fff}
+.empty-msg{text-align:center;padding:48px 16px;color:#aaa;font-size:15px;line-height:2}
+
+/* ADMIN OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.admin-panel{background:#fff;border-radius:18px;width:100%;max-width:480px;overflow:hidden;margin:auto}
+.admin-header{background:#2E4057;color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+.admin-header h2{font-size:16px;font-weight:600}
+.close-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.admin-body{padding:16px}
+
+/* LOGIN */
+.login-box{padding:8px 0}
+.login-box p{font-size:14px;color:#555;margin-bottom:12px}
+.login-box input{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #ddd;font-size:16px;margin-bottom:10px;outline:none}
+.login-box input:focus{border-color:#2E4057}
+.login-err{color:#c0392b;font-size:13px;margin-bottom:8px;display:none}
+.btn-primary{width:100%;padding:13px;border-radius:10px;border:none;background:#2E4057;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.btn-primary:active{transform:scale(0.98)}
+.btn-danger{background:#c0392b}
+.btn-green{background:#1A6B3A}
+
+/* ADMIN CONTROLS */
+.admin-section{margin-bottom:20px}
+.admin-section h3{font-size:14px;font-weight:700;color:#2E4057;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #eee}
+.selector-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.selector-row select,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;font-size:14px;color:#1a1a1a;margin-bottom:8px}
+.form-input{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;font-size:14px;margin-bottom:8px;outline:none}
+.form-input:focus{border-color:#2E4057}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.add-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#1A6B3A;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.add-btn:active{transform:scale(0.98)}
+
+/* CLIENT LIST IN ADMIN */
+.client-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8f8f8;border-radius:10px;margin-bottom:6px}
+.client-item-info{flex:1;min-width:0}
+.client-item-name{font-size:14px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-item-zone{font-size:12px;color:#888}
+.del-btn{flex-shrink:0;width:32px;height:32px;border-radius:8px;border:none;background:#FADBD8;color:#c0392b;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.del-btn:active{transform:scale(0.95)}
+.empty-clients{text-align:center;padding:16px;color:#aaa;font-size:13px}
+
+.notes-edit-area{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;font-size:14px;resize:vertical;min-height:70px;font-family:inherit;outline:none}
+.notes-edit-area:focus{border-color:#2E4057}
+.save-notes-btn{width:100%;padding:11px;border-radius:10px;border:none;background:#2E4057;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px}
+.success-msg{background:#d5f5e3;color:#1a6b3a;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:500;margin-top:8px;display:none}
+.success-msg.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-row">
+    <h1>🚐 Lavandería Garbiki</h1>
+    <button class="admin-btn" onclick="openAdmin()">⚙️ Admin</button>
+  </div>
+  <div class="day-tabs" id="dayTabs"></div>
+</div>
+
+<div class="rep-tabs" id="repTabs"></div>
+<div class="summary-bar" id="summaryBar"></div>
+<div class="notes-box" id="notesBox"></div>
+<div class="stop-list" id="stopList"></div>
+
+<!-- ADMIN OVERLAY -->
+<div class="overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <h2 id="adminTitle">⚙️ Administración</h2>
+      <button class="close-btn" onclick="closeAdmin()">✕</button>
+    </div>
+    <div class="admin-body" id="adminBody"></div>
+  </div>
+</div>
+
+<script>
+const PASS = "garbiki2024";
+const DAYS = ["LUNES","MARTES","MIERCOLES","JUEVES","VIERNES","SABADO"];
+const DAY_LABELS = {LUNES:"Lun",MARTES:"Mar",MIERCOLES:"Mié",JUEVES:"Jue",VIERNES:"Vie",SABADO:"Sáb"};
+const ER_OPTS = ["","E","R","E/R"];
+
+const DEFAULT_DATA = {
+  LUNES:{
+    notes:"⚠️ EZKABA: llevar sacos. TORRETA: recoger y cobrar.",
+    WILSON:[
+      {name:"SANSEBAY",zone:"Estella zona",er:""},
+      {name:"PAKELEKU",zone:"Estella zona",er:""},
+      {name:"LANDABEN",zone:"Pamplona",er:""}
+    ],
+    JUAN:[
+      {name:"CASA LUISA",zone:"Ayegui",er:""},
+      {name:"CASA JUAN",zone:"Ayegui",er:""},
+      {name:"CASA CERIO",zone:"Azqueta",er:""},
+      {name:"CAROL AGREDA",zone:"Estella",er:""},
+      {name:"FLORIDA",zone:"Estella",er:""},
+      {name:"CLINICA DENTAL",zone:"Estella",er:"E"},
+      {name:"APT TXAPITELA",zone:"Estella",er:""},
+      {name:"MAISONAVE",zone:"Pamplona",er:""},
+      {name:"CRISTINA P",zone:"Pamplona",er:""},
+      {name:"SENSACIONES",zone:"Pamplona",er:""},
+      {name:"EZKABA",zone:"Pamplona",er:""},
+      {name:"TORRETA",zone:"Puente la Reina",er:"R"},
+      {name:"SIF",zone:"Estella",er:"E"},
+      {name:"KEMIRA",zone:"Estella",er:"E"},
+      {name:"ZUMOS",zone:"Estella",er:"E"},
+      {name:"MANCOMUNIDAD",zone:"Estella",er:"E"},
+      {name:"UREDER",zone:"Estella",er:""},
+      {name:"IOAR",zone:"Zona",er:""},
+      {name:"LATORRIEN DE ANNE",zone:"Zona",er:""},
+      {name:"R. NAVARRA",zone:"Zona",er:""}
+    ]
+  },
+  MARTES:{
+    notes:"📌 ORBARA: solo los martes. MURUGARRE / PALACIO LA VEGA / APT CLABAO: no esta semana.",
+    WILSON:[{name:"ZENIT LOGROÑO",zone:"Avda. de Mendavia, Logroño",er:"E/R"}],
+    JUAN:[
+      {name:"IRATXE",zone:"Estella",er:""},
+      {name:"RESIDENCIA EULATE",zone:"Eulate",er:""},
+      {name:"CR EULATE",zone:"Eulate",er:""},
+      {name:"ALAI TABERNA",zone:"Zona",er:""},
+      {name:"HOTEL ECALA",zone:"Estella",er:""},
+      {name:"ZUDAIRE",zone:"Zudaire",er:""},
+      {name:"GALDEANO",zone:"Galdeano",er:""},
+      {name:"ARAMENDI",zone:"Aramendi",er:""},
+      {name:"ERAUL",zone:"Eraul",er:""},
+      {name:"ESTHER",zone:"Arizala - estanco",er:""},
+      {name:"ABARZUZA",zone:"Abarzuza",er:""},
+      {name:"ORBARA",zone:"Zona montaña",er:""},
+      {name:"CASA URRA",zone:"Zona",er:""},
+      {name:"CASA PACA",zone:"Zona",er:""},
+      {name:"MIRADOR DEYO",zone:"Solo martes",er:""},
+      {name:"ZURUCUAIN (x2)",zone:"Zurucuain",er:""}
+    ]
+  },
+  MIERCOLES:{
+    notes:"",
+    WILSON:[
+      {name:"SANSEBAY",zone:"Estella zona",er:""},
+      {name:"PAKELEKU",zone:"Estella zona",er:""},
+      {name:"LANDABEN",zone:"Pamplona",er:""}
+    ],
+    JUAN:[
+      {name:"CASA LUISA",zone:"Ayegui",er:""},
+      {name:"CASA JUAN",zone:"Ayegui",er:""},
+      {name:"FLORIDA",zone:"Estella",er:""},
+      {name:"CEPA",zone:"Estella",er:""},
+      {name:"GANBARA",zone:"Zona",er:""},
+      {name:"NAVARRA",zone:"Zona",er:"E"},
+      {name:"LACAR",zone:"Lacar",er:""},
+      {name:"CURTIDORES",zone:"Estella",er:""},
+      {name:"UREDER",zone:"Estella",er:""},
+      {name:"IOAR",zone:"Zona",er:""},
+      {name:"LA TORRIEN DE ANE",zone:"Zona",er:""}
+    ]
+  },
+  JUEVES:{
+    notes:"📌 NAVARRA y MIRADOR DEYO: solo recoger. APT AURORA: Wilson lo entrega en ruta Logroño.",
+    WILSON:[
+      {name:"ZENIT LOGROÑO",zone:"Avda. de Mendavia, Logroño",er:"E/R"},
+      {name:"APT AURORA",zone:"Zona",er:"E"}
+    ],
+    JUAN:[
+      {name:"MIRADOR DE DEYO",zone:"Zona",er:""},
+      {name:"ALAI TABERNA",zone:"Zona",er:""},
+      {name:"ZUDAIRE",zone:"Zudaire",er:""},
+      {name:"GALDEANO",zone:"Galdeano",er:""},
+      {name:"NAVARRA",zone:"Zona",er:"R"},
+      {name:"CASA CARMEN",zone:"Zona",er:""},
+      {name:"MIRADOR DEYO",zone:"Zona",er:"R"},
+      {name:"SIF",zone:"Estella",er:"E"},
+      {name:"KEMIRA",zone:"Estella",er:"E"},
+      {name:"ZUMOS",zone:"Estella",er:"E"}
+    ]
+  },
+  VIERNES:{
+    notes:"📌 PALACIO LA VEGA: no esta semana.",
+    WILSON:[
+      {name:"SANSEBAY",zone:"Estella zona",er:""},
+      {name:"PAKELEKU",zone:"Estella zona",er:""},
+      {name:"LANDABEN",zone:"Pamplona",er:""}
+    ],
+    JUAN:[
+      {name:"AYEGUI",zone:"Ayegui",er:""},
+      {name:"CASA LUISA",zone:"Ayegui",er:""},
+      {name:"CASA JUAN",zone:"Ayegui",er:""},
+      {name:"IRATXE",zone:"Estella",er:""},
+      {name:"APT TXAPITELA",zone:"Estella",er:""},
+      {name:"GARES",zone:"Puente la Reina",er:""},
+      {name:"TORRETA",zone:"Puente la Reina",er:""},
+      {name:"CAMPING ARITXALEKU",zone:"Zona",er:""},
+      {name:"CLINICA DENTAL",zone:"Estella",er:""},
+      {name:"KINARI",zone:"Estella",er:""},
+      {name:"FLORIDA",zone:"Estella",er:""},
+      {name:"CAROL AGREDA",zone:"Estella",er:""},
+      {name:"UREDER",zone:"Estella",er:""},
+      {name:"CURTIDORES",zone:"Estella",er:""},
+      {name:"LATORRIEN",zone:"Zona",er:""},
+      {name:"LUREDERRÁ",zone:"Zona",er:"R"},
+      {name:"CR ACEDO",zone:"Acedo",er:""}
+    ]
+  },
+  SABADO:{
+    notes:"🚚 Wilson: entrega y recogida en Zenit Logroño.",
+    WILSON:[{name:"ZENIT LOGROÑO",zone:"Avda. de Mendavia, Logroño",er:"E/R"}],
+    JUAN:[]
+  }
+};
+
+// Load or init route data from localStorage
+let routeData = JSON.parse(localStorage.getItem("garbiki_routes")||"null") || JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+// Session state (resets on reload — marks/counts per day)
+const state = {};
+DAYS.forEach(d=>{
+  state[d]={};
+  ["WILSON","JUAN"].forEach(r=>{
+    state[d][r]=(routeData[d][r]||[]).map(()=>({done:false,sacos:0,carros:0}));
+  });
+});
+
+function syncState(){
+  DAYS.forEach(d=>{
+    ["WILSON","JUAN"].forEach(r=>{
+      const cur = state[d][r]||[];
+      const needed = (routeData[d][r]||[]).length;
+      while(cur.length < needed) cur.push({done:false,sacos:0,carros:0});
+      state[d][r] = cur.slice(0,needed);
+    });
+  });
+}
+
+function saveRoutes(){ localStorage.setItem("garbiki_routes",JSON.stringify(routeData)); }
+
+const todayIdx = [1,2,3,4,5,6].indexOf(new Date().getDay());
+let curDay = DAYS[todayIdx>=0?todayIdx:0]||"LUNES";
+let curRep = "WILSON";
+let adminLoggedIn = false;
+let adminDay = curDay, adminRep = "WILSON";
+
+function opts(val,max){
+  let h='<option value="0">— 0</option>';
+  for(let i=1;i<=max;i++) h+=`<option value="${i}"${val==i?" selected":""}>${i}</option>`;
+  return h;
+}
+
+function render(){
+  // day tabs
+  const dayEl=document.getElementById("dayTabs");
+  dayEl.innerHTML=DAYS.map(d=>{
+    const stops=routeData[d][curRep]||[];
+    const st=state[d][curRep]||[];
+    const allDone=stops.length>0&&st.filter(s=>s.done).length===stops.length;
+    return`<button class="day-tab${d===curDay?" active":""}" onclick="setDay('${d}')">${DAY_LABELS[d]}${allDone?" ✓":""}</button>`;
+  }).join('');
+
+  // rep tabs
+  const repsAvail=["WILSON","JUAN"].filter(r=>(routeData[curDay][r]||[]).length>0);
+  if(!repsAvail.includes(curRep)) curRep=repsAvail[0]||"WILSON";
+  const repEl=document.getElementById("repTabs");
+  repEl.innerHTML=repsAvail.map(r=>
+    `<button class="rep-tab${r===curRep?" active "+r.toLowerCase():""}" onclick="setRep('${r}')">${r==="WILSON"?"🚚 Wilson":"🚐 Juan"}</button>`
+  ).join('');
+
+  // summary
+  const stops=routeData[curDay][curRep]||[];
+  const st=state[curDay][curRep]||[];
+  const done=st.filter(s=>s.done).length;
+  const sacos=st.reduce((a,s)=>a+s.sacos,0);
+  const carros=st.reduce((a,s)=>a+s.carros,0);
+  const pct=stops.length?Math.round(done/stops.length*100):0;
+  document.getElementById("summaryBar").innerHTML=`
+    <div class="summary-card"><div class="num">${done}/${stops.length}</div><div class="lbl">Paradas ${pct}%</div></div>
+    <div class="summary-card"><div class="num">${sacos}</div><div class="lbl">🧺 Sacos</div></div>
+    <div class="summary-card"><div class="num">${carros}</div><div class="lbl">🛒 Carros</div></div>
+  `;
+
+  // notes
+  const notesEl=document.getElementById("notesBox");
+  const n=routeData[curDay].notes;
+  if(n){notesEl.textContent=n;notesEl.classList.add("visible");}
+  else notesEl.classList.remove("visible");
+
+  // stops
+  const listEl=document.getElementById("stopList");
+  if(!stops.length){
+    listEl.innerHTML=`<div class="empty-msg"><span style="font-size:40px">😴</span><br>Sin ruta este día</div>`;
+    return;
+  }
+  listEl.innerHTML=stops.map((s,i)=>{
+    const item=st[i]||{done:false,sacos:0,carros:0};
+    return`<div class="stop-card${item.done?" done":""}" id="sc${i}">
+      <div class="stop-header">
+        <div class="stop-num">${item.done?"✓":i+1}</div>
+        <div class="stop-info">
+          <div class="stop-name">${s.name}</div>
+          <div class="stop-zone">📍 ${s.zone}</div>
+        </div>
+        ${s.er?`<span class="er-badge">${s.er}</span>`:""}
+      </div>
+      <div class="stop-inputs">
+        <div class="input-group"><label>🧺 Sacos recogidos</label><select onchange="upd(${i},'sacos',this.value)">${opts(item.sacos,30)}</select></div>
+        <div class="input-group"><label>🛒 Carros recogidos</label><select onchange="upd(${i},'carros',this.value)">${opts(item.carros,20)}</select></div>
+      </div>
+      <button class="check-btn" onclick="toggle(${i})">${item.done?"✅ Completado — pulsa para desmarcar":"☑️ Marcar como entregado"}</button>
+    </div>`;
+  }).join('');
+}
+
+function setDay(d){curDay=d;render();}
+function setRep(r){curRep=r;render();}
+function toggle(i){state[curDay][curRep][i].done=!state[curDay][curRep][i].done;render();}
+function upd(i,f,v){
+  state[curDay][curRep][i][f]=parseInt(v);
+  const st=state[curDay][curRep];
+  const stops=routeData[curDay][curRep]||[];
+  const done=st.filter(s=>s.done).length;
+  const sacos=st.reduce((a,s)=>a+s.sacos,0);
+  const carros=st.reduce((a,s)=>a+s.carros,0);
+  const pct=stops.length?Math.round(done/stops.length*100):0;
+  document.getElementById("summaryBar").innerHTML=`
+    <div class="summary-card"><div class="num">${done}/${stops.length}</div><div class="lbl">Paradas ${pct}%</div></div>
+    <div class="summary-card"><div class="num">${sacos}</div><div class="lbl">🧺 Sacos</div></div>
+    <div class="summary-card"><div class="num">${carros}</div><div class="lbl">🛒 Carros</div></div>
+  `;
+}
+
+/* ---- ADMIN ---- */
+function openAdmin(){
+  document.getElementById("adminOverlay").classList.add("open");
+  if(adminLoggedIn) renderAdminPanel();
+  else renderLogin();
+}
+function closeAdmin(){document.getElementById("adminOverlay").classList.remove("open");}
+
+function renderLogin(){
+  document.getElementById("adminTitle").textContent="⚙️ Administración";
+  document.getElementById("adminBody").innerHTML=`
+    <div class="login-box">
+      <p>Introduce la contraseña para acceder al panel de administración.</p>
+      <div class="login-err" id="loginErr">Contraseña incorrecta</div>
+      <input type="password" id="passInput" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    </div>`;
+  setTimeout(()=>document.getElementById("passInput").focus(),100);
+}
+
+function doLogin(){
+  const v=document.getElementById("passInput").value;
+  if(v===PASS){adminLoggedIn=true;renderAdminPanel();}
+  else{document.getElementById("loginErr").style.display="block";}
+}
+
+function renderAdminPanel(){
+  adminDay=adminDay||curDay;
+  adminRep=adminRep||"WILSON";
+  document.getElementById("adminTitle").textContent="⚙️ Gestión de rutas";
+  const reps=["WILSON","JUAN"];
+  const dayOpts=DAYS.map(d=>`<option value="${d}"${d===adminDay?" selected":""}>${d}</option>`).join('');
+  const repOpts=reps.map(r=>`<option value="${r}"${r===adminRep?" selected":""}>${r}</option>`).join('');
+  const clients=routeData[adminDay][adminRep]||[];
+  const clientList=clients.length
+    ? clients.map((c,i)=>`
+        <div class="client-item">
+          <div class="client-item-info">
+            <div class="client-item-name">${c.name}${c.er?` <span class="er-badge">${c.er}</span>`:""}</div>
+            <div class="client-item-zone">📍 ${c.zone}</div>
+          </div>
+          <button class="del-btn" onclick="deleteClient(${i})" title="Eliminar">✕</button>
+        </div>`).join('')
+    : `<div class="empty-clients">Sin clientes este día</div>`;
+
+  const noteVal=(routeData[adminDay].notes||"").replace(/"/g,"&quot;");
+
+  document.getElementById("adminBody").innerHTML=`
+    <div class="admin-section">
+      <h3>📋 Seleccionar día y repartidor</h3>
+      <div class="selector-row">
+        <select class="form-select" onchange="adminDay=this.value;renderAdminPanel()">${dayOpts}</select>
+        <select class="form-select" onchange="adminRep=this.value;renderAdminPanel()">${repOpts}</select>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>➕ Añadir cliente</h3>
+      <input class="form-input" id="newName" placeholder="Nombre del cliente" autocomplete="off">
+      <input class="form-input" id="newZone" placeholder="Zona o dirección" autocomplete="off">
+      <select class="form-select" id="newEr">
+        <option value="">Sin tipo</option>
+        <option value="E">E — Solo entrega</option>
+        <option value="R">R — Solo recogida</option>
+        <option value="E/R">E/R — Entrega y recogida</option>
+      </select>
+      <button class="add-btn" onclick="addClient()">➕ Añadir cliente</button>
+      <div class="success-msg" id="addOk">✅ Cliente añadido correctamente</div>
+    </div>
+
+    <div class="admin-section">
+      <h3>👥 Clientes en ruta (${clients.length})</h3>
+      ${clientList}
+    </div>
+
+    <div class="admin-section">
+      <h3>📌 Nota del día</h3>
+      <textarea class="notes-edit-area" id="notesEdit">${routeData[adminDay].notes||""}</textarea>
+      <button class="save-notes-btn" onclick="saveNotes()">💾 Guardar nota</button>
+      <div class="success-msg" id="notesOk">✅ Nota guardada</div>
+    </div>
+
+    <div class="admin-section">
+      <button class="btn-primary btn-danger" onclick="if(confirm('¿Cerrar sesión?')){adminLoggedIn=false;closeAdmin();}">🔒 Cerrar sesión</button>
+    </div>
+  `;
+}
+
+function addClient(){
+  const name=document.getElementById("newName").value.trim().toUpperCase();
+  const zone=document.getElementById("newZone").value.trim();
+  const er=document.getElementById("newEr").value;
+  if(!name){document.getElementById("newName").focus();return;}
+  if(!routeData[adminDay][adminRep]) routeData[adminDay][adminRep]=[];
+  routeData[adminDay][adminRep].push({name,zone:zone||"—",er});
+  syncState();
+  saveRoutes();
+  const ok=document.getElementById("addOk");
+  ok.classList.add("show");
+  setTimeout(()=>ok.classList.remove("show"),2000);
+  document.getElementById("newName").value="";
+  document.getElementById("newZone").value="";
+  document.getElementById("newEr").value="";
+  renderAdminPanel();
+  render();
+}
+
+function deleteClient(idx){
+  const c=routeData[adminDay][adminRep][idx];
+  if(!confirm(`¿Eliminar "${c.name}" de la ruta del ${adminDay} (${adminRep})?`)) return;
+  routeData[adminDay][adminRep].splice(idx,1);
+  syncState();
+  saveRoutes();
+  renderAdminPanel();
+  render();
+}
+
+function saveNotes(){
+  routeData[adminDay].notes=document.getElementById("notesEdit").value.trim();
+  saveRoutes();
+  const ok=document.getElementById("notesOk");
+  ok.classList.add("show");
+  setTimeout(()=>ok.classList.remove("show"),2000);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
