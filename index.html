@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Garbiki — Rutas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;min-height:100vh}
+.top-bar{background:#2E4057;color:#fff;padding:14px 16px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.25)}
+.top-bar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.top-bar h1{font-size:16px;font-weight:600}
+.top-btns{display:flex;gap:6px}
+.admin-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.hist-btn{background:rgba(255,200,0,0.25);border:none;color:#FFD700;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.day-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.day-tabs::-webkit-scrollbar{display:none}
+.day-tab{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:rgba(255,255,255,0.15);color:#fff;transition:all 0.15s}
+.day-tab.active{background:#fff;color:#2E4057}
+.rep-tabs{display:flex;gap:8px;padding:12px 16px 0}
+.rep-tab{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;border:1.5px solid #ddd;cursor:pointer;background:#fff;color:#888;text-align:center;transition:all 0.15s}
+.rep-tab.active.wilson{background:#2E4057;color:#fff;border-color:#2E4057}
+.rep-tab.active.juan{background:#1A6B3A;color:#fff;border-color:#1A6B3A}
+.rep-tab.active.planta{background:#7D3C98;color:#fff;border-color:#7D3C98}
+.summary-bar{display:flex;gap:8px;padding:10px 16px}
+.summary-card{flex:1;background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:10px 8px;text-align:center}
+.summary-card .num{font-size:20px;font-weight:700;color:#2E4057}
+.summary-card .lbl{font-size:10px;color:#888;margin-top:2px}
+.notes-box{margin:0 16px 8px;background:#FFF3CD;border-radius:10px;padding:10px 12px;font-size:13px;color:#856404;border:1px solid #F0C14B;display:none;line-height:1.4}
+.notes-box.visible{display:block}
+.stop-list{padding:0 16px 80px;display:flex;flex-direction:column;gap:10px}
+.stop-card{background:#fff;border-radius:14px;border:1.5px solid #e8e8e8;padding:14px;transition:all 0.2s}
+.stop-card.done{border-color:#27AE60;opacity:0.85}
+.stop-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.stop-num{width:30px;height:30px;border-radius:50%;background:#2E4057;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stop-card.done .stop-num{background:#27AE60}
+.stop-info{flex:1;min-width:0}
+.stop-name{font-size:15px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stop-zone{font-size:12px;color:#888;margin-top:2px}
+.er-badge{flex-shrink:0;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
+.service-row{display:flex;gap:6px;margin-bottom:12px}
+.svc-btn{flex:1;padding:8px 2px;border-radius:10px;border:2px solid #ddd;background:#f8f8f8;font-size:12px;font-weight:700;cursor:pointer;text-align:center;color:#888}
+.svc-label{font-size:10px;display:block;margin-top:2px;font-weight:500}
+.stop-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.input-group label{display:block;font-size:11px;color:#666;margin-bottom:4px;font-weight:500}
+.input-group select{width:100%;padding:9px 8px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;color:#1a1a1a;font-size:14px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:22px}
+.check-btn{width:100%;padding:13px;border-radius:10px;border:1.5px solid #27AE60;background:transparent;color:#27AE60;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.check-btn:active{transform:scale(0.97)}
+.stop-card.done .check-btn{background:#27AE60;color:#fff}
+.empty-msg{text-align:center;padding:48px 16px;color:#aaa;font-size:15px;line-height:2}
+.save-indicator{position:fixed;bottom:20px;right:20px;background:#27AE60;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.save-indicator.show{opacity:1}
+/* PLANTA */
+.planta-view{padding:0 16px 80px}
+.planta-header{background:#7D3C98;border-radius:14px;padding:16px;margin-bottom:16px;color:#fff;margin-top:10px}
+.planta-header h2{font-size:16px;font-weight:700;margin-bottom:4px}
+.planta-header p{font-size:12px;opacity:0.85}
+.planta-summary{display:flex;gap:8px;margin-bottom:16px}
+.planta-summary-card{flex:1;background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:10px 8px;text-align:center}
+.planta-summary-card .num{font-size:22px;font-weight:700;color:#7D3C98}
+.planta-summary-card .lbl{font-size:10px;color:#888;margin-top:2px}
+.planta-add-box{background:#fff;border-radius:14px;border:1.5px solid #ddd;padding:14px;margin-bottom:16px}
+.planta-add-box h3{font-size:14px;font-weight:700;color:#7D3C98;margin-bottom:12px}
+.planta-input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #ddd;font-size:15px;outline:none;font-family:inherit;margin-bottom:10px}
+.planta-input:focus{border-color:#7D3C98}
+.planta-add-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#7D3C98;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.planta-client-card{background:#fff;border-radius:14px;border:1.5px solid #e8e8e8;padding:14px;margin-bottom:10px}
+.planta-client-card.registrado{border-color:#27AE60}
+.planta-client-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.planta-client-icon{width:36px;height:36px;border-radius:50%;background:#EDE7F6;color:#7D3C98;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.planta-client-card.registrado .planta-client-icon{background:#27AE60;color:#fff}
+.planta-client-name{font-size:15px;font-weight:700;color:#1a1a1a;flex:1}
+.planta-del-btn{width:30px;height:30px;border-radius:8px;border:none;background:#FADBD8;color:#c0392b;font-size:14px;cursor:pointer;font-weight:700;flex-shrink:0}
+.planta-sacos-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.planta-sacos-row label{font-size:13px;color:#666;font-weight:500;flex-shrink:0}
+.planta-sacos-select{flex:1;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;font-size:15px;appearance:none;-webkit-appearance:none}
+.planta-register-btn{width:100%;padding:12px;border-radius:10px;border:1.5px solid #7D3C98;background:transparent;color:#7D3C98;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.planta-register-btn:active{transform:scale(0.97)}
+.planta-client-card.registrado .planta-register-btn{background:#27AE60;color:#fff;border-color:#27AE60}
+.planta-registered-info{font-size:13px;color:#27AE60;font-weight:600;text-align:center;padding:4px 0}
+/* OVERLAYS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.panel{background:#fff;border-radius:18px;width:100%;max-width:500px;overflow:hidden;margin:auto}
+.panel-header{background:#2E4057;color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+.panel-header.hist{background:#1A4A7A}
+.panel-header h2{font-size:16px;font-weight:600}
+.close-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.panel-body{padding:16px;max-height:82vh;overflow-y:auto}
+.form-input{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;font-size:14px;margin-bottom:8px;outline:none;font-family:inherit}
+.form-input:focus{border-color:#2E4057}
+.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;font-size:14px;color:#1a1a1a;margin-bottom:8px}
+.login-err{color:#c0392b;font-size:13px;margin-bottom:8px;display:none}
+.btn-primary{width:100%;padding:13px;border-radius:10px;border:none;background:#2E4057;color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
+.btn-primary:active{transform:scale(0.98)}
+.btn-red{background:#c0392b}
+.admin-section{margin-bottom:20px}
+.admin-section h3{font-size:14px;font-weight:700;color:#2E4057;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #eee}
+.selector-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.add-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#1A6B3A;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.client-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8f8f8;border-radius:10px;margin-bottom:6px}
+.order-btns{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.order-btn{width:28px;height:28px;border-radius:6px;border:1px solid #ddd;background:#fff;color:#2E4057;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.order-btn:active{background:#2E4057;color:#fff}
+.order-btn:disabled{color:#ccc;cursor:default;background:#f0f0f0}
+.client-item-info{flex:1;min-width:0}
+.client-item-name{font-size:14px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-item-zone{font-size:12px;color:#888;margin-top:2px}
+.client-item-num{font-size:12px;font-weight:700;color:#fff;background:#2E4057;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.del-btn{width:32px;height:28px;border-radius:8px;border:none;background:#FADBD8;color:#c0392b;font-size:14px;cursor:pointer;font-weight:700}
+.er-selector{display:flex;gap:4px;margin-top:6px}
+.er-opt{flex:1;padding:5px 2px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;font-size:11px;font-weight:700;cursor:pointer;text-align:center;color:#888}
+.er-opt.sel-none{border-color:#999;background:#eee;color:#444}
+.er-opt.sel-e{border-color:#2E75B6;background:#D6EAF8;color:#1A5276}
+.er-opt.sel-r{border-color:#C0392B;background:#FADBD8;color:#922B21}
+.er-opt.sel-er{border-color:#1A6B3A;background:#D5F5E3;color:#145A32}
+.notes-edit-area{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;font-size:14px;resize:vertical;min-height:70px;font-family:inherit;outline:none}
+.success-msg{background:#d5f5e3;color:#1a6b3a;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:500;margin-top:8px;display:none}
+.success-msg.show{display:block}
+.hint-box{background:#E8F4FD;border-radius:8px;padding:8px 12px;font-size:12px;color:#1A5276;margin-bottom:10px;border:1px solid #AED6F1}
+.hist-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.hist-filters select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #ddd;background:#f8f8f8;font-size:14px}
+.hist-totals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+.hist-total-card{background:#f0f4ff;border-radius:10px;padding:8px 6px;text-align:center}
+.hist-total-card .hn{font-size:18px;font-weight:700;color:#2E4057}
+.hist-total-card .hl{font-size:10px;color:#888;margin-top:2px}
+.hist-table{width:100%;border-collapse:collapse;font-size:12px}
+.hist-table th{background:#2E4057;color:#fff;padding:7px 8px;text-align:left;font-weight:600}
+.hist-table td{padding:7px 8px;border-bottom:1px solid #f0f0f0}
+.hist-table tr:nth-child(even) td{background:#f8f8f8}
+.hist-empty{text-align:center;padding:32px;color:#aaa;font-size:14px}
+.loading-msg{text-align:center;padding:32px;color:#888;font-size:14px}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div class="top-bar-row">
+    <h1>🚐 Lavandería Garbiki</h1>
+    <div class="top-btns">
+      <button class="hist-btn" onclick="openHist()">📊 Historial</button>
+      <button class="admin-btn" onclick="openAdmin()">⚙️ Admin</button>
+    </div>
+  </div>
+  <div class="day-tabs" id="dayTabs"></div>
+</div>
+<div class="rep-tabs" id="repTabs"></div>
+<div id="mainContent"></div>
+<div class="save-indicator" id="saveInd">✅ Guardado</div>
+
+<div class="overlay" id="adminOverlay">
+  <div class="panel">
+    <div class="panel-header"><h2 id="adminTitle">⚙️ Administración</h2><button class="close-btn" onclick="closeAdmin()">✕</button></div>
+    <div class="panel-body" id="adminBody"></div>
+  </div>
+</div>
+<div class="overlay" id="histOverlay">
+  <div class="panel">
+    <div class="panel-header hist"><h2>📊 Historial de entradas</h2><button class="close-btn" onclick="closeHist()">✕</button></div>
+    <div class="panel-body" id="histBody"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCEiF0Qlz0YQDkG1q6-9sAy8_dtRsGt-x8",
+  authDomain:"garbiki-78f52.firebaseapp.com",
+  databaseURL:"https://garbiki-78f52-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"garbiki-78f52",
+  storageBucket:"garbiki-78f52.firebasestorage.app",
+  messagingSenderId:"202139534785",
+  appId:"1:202139534785:web:76aea57523294cfd8a5b40"
+});
+const db=firebase.database();
+
+const PASS="garbiki2024";
+const DAYS=["LUNES","MARTES","MIERCOLES","JUEVES","VIERNES","SABADO"];
+const DAY_LABELS={LUNES:"Lun",MARTES:"Mar",MIERCOLES:"Mié",JUEVES:"Jue",VIERNES:"Vie",SABADO:"Sáb"};
+
+const DEFAULT_ROUTES={
+  LUNES:{notes:"⚠️ EZKABA: llevar sacos. TORRETA: recoger y cobrar.",
+    WILSON:[{name:"SANSEBAY",zone:"Estella zona",er:""},{name:"PAKELEKU",zone:"Estella zona",er:""},{name:"LANDABEN",zone:"Pamplona",er:""}],
+    JUAN:[{name:"CASA LUISA",zone:"Ayegui",er:""},{name:"CASA JUAN",zone:"Ayegui",er:""},{name:"CASA CERIO",zone:"Azqueta",er:""},{name:"CAROL AGREDA",zone:"Estella",er:""},{name:"FLORIDA",zone:"Estella",er:""},{name:"CLINICA DENTAL",zone:"Estella",er:"E"},{name:"APT TXAPITELA",zone:"Estella",er:""},{name:"MAISONAVE",zone:"Pamplona",er:""},{name:"CRISTINA P",zone:"Pamplona",er:""},{name:"SENSACIONES",zone:"Pamplona",er:""},{name:"EZKABA",zone:"Pamplona",er:""},{name:"TORRETA",zone:"Puente la Reina",er:"R"},{name:"SIF",zone:"Estella",er:"E"},{name:"KEMIRA",zone:"Estella",er:"E"},{name:"ZUMOS",zone:"Estella",er:"E"},{name:"MANCOMUNIDAD",zone:"Estella",er:"E"},{name:"UREDER",zone:"Estella",er:""},{name:"IOAR",zone:"Zona",er:""},{name:"LATORRIEN DE ANNE",zone:"Zona",er:""},{name:"R. NAVARRA",zone:"Zona",er:""}]},
+  MARTES:{notes:"📌 ORBARA: solo los martes.",
+    WILSON:[{name:"ZENIT LOGROÑO",zone:"Avda. de Mendavia, Logroño",er:"E/R"}],
+    JUAN:[{name:"IRATXE",zone:"Estella",er:""},{name:"RESIDENCIA EULATE",zone:"Eulate",er:""},{name:"CR EULATE",zone:"Eulate",er:""},{name:"ALAI TABERNA",zone:"Zona",er:""},{name:"HOTEL ECALA",zone:"Estella",er:""},{name:"ZUDAIRE",zone:"Zudaire",er:""},{name:"GALDEANO",zone:"Galdeano",er:""},{name:"ARAMENDI",zone:"Aramendi",er:""},{name:"ERAUL",zone:"Eraul",er:""},{name:"ESTHER",zone:"Arizala - estanco",er:""},{name:"ABARZUZA",zone:"Abarzuza",er:""},{name:"ORBARA",zone:"Zona montaña",er:""},{name:"CASA URRA",zone:"Zona",er:""},{name:"CASA PACA",zone:"Zona",er:""},{name:"MIRADOR DEYO",zone:"Solo martes",er:""},{name:"ZURUCUAIN (x2)",zone:"Zurucuain",er:""}]},
+  MIERCOLES:{notes:"",
+    WILSON:[{name:"SANSEBAY",zone:"Estella zona",er:""},{name:"PAKELEKU",zone:"Estella zona",er:""},{name:"LANDABEN",zone:"Pamplona",er:""}],
+    JUAN:[{name:"CASA LUISA",zone:"Ayegui",er:""},{name:"CASA JUAN",zone:"Ayegui",er:""},{name:"FLORIDA",zone:"Estella",er:""},{name:"CEPA",zone:"Estella",er:""},{name:"GANBARA",zone:"Zona",er:""},{name:"NAVARRA",zone:"Zona",er:"E"},{name:"LACAR",zone:"Lacar",er:""},{name:"CURTIDORES",zone:"Estella",er:""},{name:"UREDER",zone:"Estella",er:""},{name:"IOAR",zone:"Zona",er:""},{name:"LA TORRIEN DE ANE",zone:"Zona",er:""}]},
+  JUEVES:{notes:"📌 NAVARRA y MIRADOR DEYO: solo recoger.",
+    WILSON:[{name:"ZENIT LOGROÑO",zone:"Avda. de Mendavia, Logroño",er:"E/R"},{name:"APT AURORA",zone:"Zona",er:"E"}],
+    JUAN:[{name:"MIRADOR DE DEYO",zone:"Zona",er:""},{name:"ALAI TABERNA",zone:"Zona",er:""},{name:"ZUDAIRE",zone:"Zudaire",er:""},{name:"GALDEANO",zone:"Galdeano",er:""},{name:"NAVARRA",zone:"Zona",er:"R"},{name:"CASA CARMEN",zone:"Zona",er:""},{name:"MIRADOR DEYO",zone:"Zona",er:"R"},{name:"SIF",zone:"Estella",er:"E"},{name:"KEMIRA",zone:"Estella",er:"E"},{name:"ZUMOS",zone:"Estella",er:"E"}]},
+  VIERNES:{notes:"📌 PALACIO LA VEGA: no esta semana.",
+    WILSON:[{name:"SANSEBAY",zone:"Estella zona",er:""},{name:"PAKELEKU",zone:"Estella zona",er:""},{name:"LANDABEN",zone:"Pamplona",er:""}],
+    JUAN:[{name:"AYEGUI",zone:"Ayegui",er:""},{name:"CASA LUISA",zone:"Ayegui",er:""},{name:"CASA JUAN",zone:"Ayegui",er:""},{name:"IRATXE",zone:"Estella",er:""},{name:"APT TXAPITELA",zone:"Estella",er:""},{name:"GARES",zone:"Puente la Reina",er:""},{name:"TORRETA",zone:"Puente la Reina",er:""},{name:"CAMPING ARITXALEKU",zone:"Zona",er:""},{name:"CLINICA DENTAL",zone:"Estella",er:""},{name:"KINARI",zone:"Estella",er:""},{name:"FLORIDA",zone:"Estella",er:""},{name:"CAROL AGREDA",zone:"Estella",er:""},{name:"UREDER",zone:"Estella",er:""},{name:"CURTIDORES",zone:"Estella",er:""},{name:"LATORRIEN",zone:"Zona",er:""},{name:"LUREDERRÁ",zone:"Zona",er:"R"},{name:"CR ACEDO",zone:"Acedo",er:""}]},
+  SABADO:{notes:"🚚 Wilson: entrega y recogida en Zenit Logroño.",
+    WILSON:[{name:"ZENIT LOGROÑO",zone:"Avda. de Mendavia, Logroño",er:"E/R"}],
+    JUAN:[]}
+};
+
+let routeData=JSON.parse(JSON.stringify(DEFAULT_ROUTES));
+let plantaClients=[];
+// plantaSession[dia][clientId] = {sacos, registrado}
+let plantaSession={};
+DAYS.forEach(d=>{plantaSession[d]={};});
+
+const todayIdx=[1,2,3,4,5,6].indexOf(new Date().getDay());
+let curDay=DAYS[todayIdx>=0?todayIdx:0]||"LUNES";
+let curRep="WILSON";
+let adminLoggedIn=false,adminDay=curDay,adminRep="WILSON";
+
+// ruta session[day][rep][i] = {done, sacos, carrosRecogidos, carrosEntregados}
+const session={};
+DAYS.forEach(d=>{session[d]={WILSON:[],JUAN:[]};});
+
+Promise.all([
+  db.ref("routes").once("value"),
+  db.ref("plantaClients").once("value")
+]).then(([rs,ps])=>{
+  if(rs.val()) routeData=rs.val();
+  if(ps.val()) plantaClients=Object.values(ps.val());
+  syncSession();
+  render();
+});
+
+function syncSession(){
+  DAYS.forEach(d=>{
+    ["WILSON","JUAN"].forEach(r=>{
+      const n=(routeData[d]&&routeData[d][r]||[]).length;
+      const cur=session[d][r]||[];
+      while(cur.length<n) cur.push({done:false,sacos:0,carrosRecogidos:0,carrosEntregados:0});
+      session[d][r]=cur.slice(0,n);
+    });
+    if(!plantaSession[d]) plantaSession[d]={};
+    plantaClients.forEach(c=>{
+      if(!plantaSession[d][c.id]) plantaSession[d][c.id]={sacos:0,registrado:false};
+    });
+  });
+}
+
+function showSaved(){
+  const el=document.getElementById("saveInd");
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2000);
+}
+
+function saveRutaToFirebase(day,rep){
+  const dateStr=new Date().toISOString().slice(0,10);
+  const stops=routeData[day][rep]||[];
+  const st=session[day][rep]||[];
+  const entries={};
+  stops.forEach((s,i)=>{
+    const item=st[i]||{};
+    if(item.sacos>0||item.carrosRecogidos>0||item.carrosEntregados>0||item.done){
+      const key=s.name.replace(/[^a-zA-Z0-9]/g,"_");
+      entries[key]={cliente:s.name,zona:s.zone,sacos:item.sacos||0,carrosRecogidos:item.carrosRecogidos||0,carrosEntregados:item.carrosEntregados||0,completado:item.done||false,servicio:s.er||"",repartidor:rep,dia:day,fecha:dateStr,timestamp:Date.now()};
+    }
+  });
+  if(Object.keys(entries).length>0){
+    db.ref(`historial/${dateStr}/${rep}`).update(entries).then(()=>showSaved());
+  } else showSaved();
+}
+
+function savePlantaToFirebase(clientName,sacos,dia){
+  const dateStr=new Date().toISOString().slice(0,10);
+  const key=clientName.replace(/[^a-zA-Z0-9]/g,"_");
+  db.ref(`historial/${dateStr}/PLANTA/${key}`).set({
+    cliente:clientName,sacos,repartidor:"PLANTA",dia,fecha:dateStr,timestamp:Date.now()
+  }).then(()=>showSaved());
+}
+
+function opts(val,max){
+  let h='<option value="0">— 0</option>';
+  for(let i=1;i<=max;i++) h+=`<option value="${i}"${val==i?" selected":""}>${i}</option>`;
+  return h;
+}
+function erBadgeStyle(er){
+  if(er==="E") return "background:#D6EAF8;color:#1A5276";
+  if(er==="R") return "background:#FADBD8;color:#922B21";
+  if(er==="E/R") return "background:#D5F5E3;color:#145A32";
+  return "";
+}
+
+/* ========== RENDER ========== */
+function render(){
+  // Day tabs
+  document.getElementById("dayTabs").innerHTML=DAYS.map(d=>{
+    let marker="";
+    if(curRep==="PLANTA"){
+      const ds=plantaSession[d]||{};
+      const reg=Object.values(ds).filter(s=>s.registrado).length;
+      if(reg>0) marker=` (${reg})`;
+    } else {
+      const st=session[d][curRep]||[];
+      const stops=routeData[d]&&routeData[d][curRep]||[];
+      const allDone=stops.length>0&&st.filter(s=>s.done).length===stops.length;
+      if(allDone) marker=" ✓";
+    }
+    return`<button class="day-tab${d===curDay?" active":""}" onclick="setDay('${d}')">${DAY_LABELS[d]}${marker}</button>`;
+  }).join('');
+
+  // Rep tabs
+  document.getElementById("repTabs").innerHTML=`
+    <button class="rep-tab${curRep==="WILSON"?" active wilson":""}" onclick="setRep('WILSON')">🚚 Wilson</button>
+    <button class="rep-tab${curRep==="JUAN"?" active juan":""}" onclick="setRep('JUAN')">🚐 Juan</button>
+    <button class="rep-tab${curRep==="PLANTA"?" active planta":""}" onclick="setRep('PLANTA')">🏭 Planta</button>`;
+
+  curRep==="PLANTA" ? renderPlanta() : renderRuta();
+}
+
+function renderRuta(){
+  const stops=routeData[curDay]&&routeData[curDay][curRep]||[];
+  const st=session[curDay][curRep]||[];
+  const done=st.filter(s=>s.done).length;
+  const sacos=st.reduce((a,s)=>a+(s.sacos||0),0);
+  const cRec=st.reduce((a,s)=>a+(s.carrosRecogidos||0),0);
+  const cEnt=st.reduce((a,s)=>a+(s.carrosEntregados||0),0);
+  const pct=stops.length?Math.round(done/stops.length*100):0;
+  const n=routeData[curDay]&&routeData[curDay].notes||"";
+
+  const stopsHtml=!stops.length
+    ?`<div class="empty-msg"><span style="font-size:40px">😴</span><br>Sin ruta este día</div>`
+    :stops.map((s,i)=>{
+      const item=st[i]||{done:false,sacos:0,carrosRecogidos:0,carrosEntregados:0};
+      const er=s.er||"";
+      return`<div class="stop-card${item.done?" done":""}">
+        <div class="stop-header">
+          <div class="stop-num">${item.done?"✓":i+1}</div>
+          <div class="stop-info"><div class="stop-name">${s.name}</div><div class="stop-zone">📍 ${s.zone}</div></div>
+          ${er?`<span class="er-badge" style="${erBadgeStyle(er)}">${er}</span>`:""}
+        </div>
+        <div class="service-row">
+          <button class="svc-btn" onclick="setSvc(${i},'')" style="${er===""?"border-color:#999;background:#eee;color:#444":""}">—<span class="svc-label">Sin tipo</span></button>
+          <button class="svc-btn" onclick="setSvc(${i},'E')" style="${er==="E"?"border-color:#2E75B6;background:#D6EAF8;color:#1A5276":""}">📦 E<span class="svc-label">Entregar</span></button>
+          <button class="svc-btn" onclick="setSvc(${i},'R')" style="${er==="R"?"border-color:#C0392B;background:#FADBD8;color:#922B21":""}">🧺 R<span class="svc-label">Recoger</span></button>
+          <button class="svc-btn" onclick="setSvc(${i},'E/R')" style="${er==="E/R"?"border-color:#1A6B3A;background:#D5F5E3;color:#145A32":""}">🔄 E/R<span class="svc-label">Ambos</span></button>
+        </div>
+        <div class="stop-inputs">
+          <div class="input-group"><label>🧺 Sacos recog.</label><select onchange="upd(${i},'sacos',this.value)">${opts(item.sacos,30)}</select></div>
+          <div class="input-group"><label>🛒 Carros recog.</label><select onchange="upd(${i},'carrosRecogidos',this.value)">${opts(item.carrosRecogidos,20)}</select></div>
+          <div class="input-group"><label>📦 Carros entre.</label><select onchange="upd(${i},'carrosEntregados',this.value)">${opts(item.carrosEntregados,20)}</select></div>
+        </div>
+        <button class="check-btn" onclick="toggle(${i})">${item.done?"✅ Completado — pulsa para desmarcar":"☑️ Marcar como entregado"}</button>
+      </div>`;
+    }).join('');
+
+  document.getElementById("mainContent").innerHTML=`
+    <div class="summary-bar">
+      <div class="summary-card"><div class="num">${done}/${stops.length}</div><div class="lbl">Paradas ${pct}%</div></div>
+      <div class="summary-card"><div class="num">${sacos}</div><div class="lbl">🧺 Sacos</div></div>
+      <div class="summary-card"><div class="num">${cRec}</div><div class="lbl">🛒 C.Recog.</div></div>
+      <div class="summary-card"><div class="num">${cEnt}</div><div class="lbl">📦 C.Entre.</div></div>
+    </div>
+    ${n?`<div class="notes-box visible">${n}</div>`:""}
+    <div class="stop-list">${stopsHtml}</div>`;
+}
+
+function renderPlanta(){
+  const ds=plantaSession[curDay]||{};
+  const totalSacos=Object.values(ds).reduce((a,s)=>a+(s.sacos||0),0);
+  const totalReg=Object.values(ds).filter(s=>s.registrado).length;
+  const dayName=curDay.charAt(0)+curDay.slice(1).toLowerCase();
+
+  const clientCards=plantaClients.length
+    ?plantaClients.map(c=>{
+      const ps=ds[c.id]||{sacos:0,registrado:false};
+      return`<div class="planta-client-card${ps.registrado?" registrado":""}">
+        <div class="planta-client-header">
+          <div class="planta-client-icon">${ps.registrado?"✓":"👤"}</div>
+          <div class="planta-client-name">${c.name}</div>
+          <button class="planta-del-btn" onclick="plantaDelClient('${c.id}')">✕</button>
+        </div>
+        ${ps.registrado
+          ?`<div class="planta-registered-info">✅ Registrado — ${ps.sacos} saco${ps.sacos!==1?"s":""}</div>
+             <button class="planta-register-btn" style="margin-top:8px;border-color:#888;color:#888" onclick="plantaDesregistrar('${c.id}')">↩ Deshacer</button>`
+          :`<div class="planta-sacos-row">
+              <label>🧺 Sacos:</label>
+              <select class="planta-sacos-select" id="sacos_${c.id}">${opts(ps.sacos,50)}</select>
+            </div>
+            <button class="planta-register-btn" onclick="plantaRegistrar('${c.id}','${c.name}')">📥 Registrar entrada</button>`
+        }
+      </div>`;
+    }).join('')
+    :`<div class="empty-msg"><span style="font-size:36px">📋</span><br>Sin clientes en planta<br><span style="font-size:13px">Añade el primero abajo</span></div>`;
+
+  document.getElementById("mainContent").innerHTML=`
+    <div class="planta-view">
+      <div class="planta-header">
+        <h2>🏭 Planta — ${dayName}</h2>
+        <p>Álvaro · ${totalReg} cliente${totalReg!==1?"s":""} registrado${totalReg!==1?"s":""} · ${totalSacos} saco${totalSacos!==1?"s":""} hoy</p>
+      </div>
+      <div class="planta-add-box">
+        <h3>➕ Añadir cliente de planta</h3>
+        <input class="planta-input" id="plantaNewName" placeholder="Nombre del cliente" autocomplete="off">
+        <button class="planta-add-btn" onclick="plantaAddClient()">➕ Añadir cliente</button>
+      </div>
+      ${clientCards}
+    </div>`;
+}
+
+/* ========== PLANTA ACTIONS ========== */
+function plantaAddClient(){
+  const name=document.getElementById("plantaNewName").value.trim().toUpperCase();
+  if(!name) return;
+  const id="c_"+Date.now();
+  const client={id,name};
+  plantaClients.push(client);
+  DAYS.forEach(d=>{if(!plantaSession[d]) plantaSession[d]={};plantaSession[d][id]={sacos:0,registrado:false};});
+  db.ref("plantaClients/"+id).set(client).then(()=>{
+    document.getElementById("plantaNewName").value="";
+    renderPlanta();showSaved();
+  });
+}
+function plantaDelClient(id){
+  const c=plantaClients.find(x=>x.id===id);
+  if(!c||!confirm(`¿Eliminar "${c.name}" de planta?`)) return;
+  plantaClients=plantaClients.filter(x=>x.id!==id);
+  DAYS.forEach(d=>{delete plantaSession[d][id];});
+  db.ref("plantaClients/"+id).remove().then(()=>{renderPlanta();showSaved();});
+}
+function plantaRegistrar(id,name){
+  const sacos=parseInt(document.getElementById("sacos_"+id).value)||0;
+  if(!plantaSession[curDay]) plantaSession[curDay]={};
+  plantaSession[curDay][id]={sacos,registrado:true};
+  savePlantaToFirebase(name,sacos,curDay);
+  renderPlanta();
+}
+function plantaDesregistrar(id){
+  if(!plantaSession[curDay]) return;
+  plantaSession[curDay][id]={sacos:0,registrado:false};
+  renderPlanta();
+}
+
+/* ========== RUTA ACTIONS ========== */
+function setSvc(i,val){
+  routeData[curDay][curRep][i].er=val;
+  db.ref("routes").set(routeData).then(()=>{showSaved();renderRuta();});
+}
+function setDay(d){curDay=d;render();}
+function setRep(r){curRep=r;render();}
+function toggle(i){
+  session[curDay][curRep][i].done=!session[curDay][curRep][i].done;
+  saveRutaToFirebase(curDay,curRep);renderRuta();
+}
+function upd(i,f,v){
+  session[curDay][curRep][i][f]=parseInt(v);
+  saveRutaToFirebase(curDay,curRep);renderRuta();
+}
+
+/* ========== ADMIN ========== */
+function openAdmin(){document.getElementById("adminOverlay").classList.add("open");adminLoggedIn?renderAdminPanel():renderLogin();}
+function closeAdmin(){document.getElementById("adminOverlay").classList.remove("open");}
+function renderLogin(){
+  document.getElementById("adminTitle").textContent="⚙️ Administración";
+  document.getElementById("adminBody").innerHTML=`
+    <p style="font-size:14px;color:#555;margin-bottom:12px">Introduce la contraseña de administrador.</p>
+    <div class="login-err" id="loginErr">Contraseña incorrecta</div>
+    <input type="password" class="form-input" id="passInput" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>`;
+  setTimeout(()=>document.getElementById("passInput").focus(),100);
+}
+function doLogin(){
+  if(document.getElementById("passInput").value===PASS){adminLoggedIn=true;renderAdminPanel();}
+  else document.getElementById("loginErr").style.display="block";
+}
+function erOptClass(cur,val){
+  if(val===""&&cur==="") return "er-opt sel-none";
+  if(val==="E"&&cur==="E") return "er-opt sel-e";
+  if(val==="R"&&cur==="R") return "er-opt sel-r";
+  if(val==="E/R"&&cur==="E/R") return "er-opt sel-er";
+  return "er-opt";
+}
+function renderAdminPanel(){
+  document.getElementById("adminTitle").textContent="⚙️ Gestión de rutas";
+  const clients=routeData[adminDay]&&routeData[adminDay][adminRep]||[];
+  const dayOpts=DAYS.map(d=>`<option value="${d}"${d===adminDay?" selected":""}>${d}</option>`).join('');
+  const repOpts=["WILSON","JUAN"].map(r=>`<option value="${r}"${r===adminRep?" selected":""}>${r}</option>`).join('');
+  const clientList=clients.length?clients.map((c,i)=>{
+    const er=c.er||"";
+    return`<div class="client-item" style="flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <div class="client-item-num">${i+1}</div>
+        <div class="order-btns">
+          <button class="order-btn" onclick="moveClient(${i},-1)" ${i===0?"disabled":""}>▲</button>
+          <button class="order-btn" onclick="moveClient(${i},1)" ${i===clients.length-1?"disabled":""}>▼</button>
+        </div>
+        <div class="client-item-info"><div class="client-item-name">${c.name}</div><div class="client-item-zone">📍 ${c.zone}</div></div>
+        <button class="del-btn" onclick="deleteClient(${i})">✕</button>
+      </div>
+      <div style="width:100%;padding-left:8px;margin-top:6px">
+        <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:500">Servicio:</div>
+        <div class="er-selector">
+          <button class="${erOptClass(er,"")}" onclick="setClientEr(${i},'')">— Sin tipo</button>
+          <button class="${erOptClass(er,"E")}" onclick="setClientEr(${i},'E')">📦 E</button>
+          <button class="${erOptClass(er,"R")}" onclick="setClientEr(${i},'R')">🧺 R</button>
+          <button class="${erOptClass(er,"E/R")}" onclick="setClientEr(${i},'E/R')">🔄 E/R</button>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):`<div style="text-align:center;padding:16px;color:#aaa;font-size:13px">Sin clientes este día</div>`;
+  document.getElementById("adminBody").innerHTML=`
+    <div class="admin-section">
+      <h3>📋 Día y repartidor</h3>
+      <div class="selector-row">
+        <select class="form-select" onchange="adminDay=this.value;renderAdminPanel()">${dayOpts}</select>
+        <select class="form-select" onchange="adminRep=this.value;renderAdminPanel()">${repOpts}</select>
+      </div>
+    </div>
+    <div class="admin-section">
+      <h3>➕ Añadir cliente</h3>
+      <input class="form-input" id="newName" placeholder="Nombre del cliente" autocomplete="off">
+      <input class="form-input" id="newZone" placeholder="Zona o dirección" autocomplete="off">
+      <select class="form-select" id="newEr">
+        <option value="">Sin tipo</option><option value="E">E — Solo entrega</option>
+        <option value="R">R — Solo recogida</option><option value="E/R">E/R — Entregar y recoger</option>
+      </select>
+      <button class="add-btn" onclick="addClient()">➕ Añadir cliente</button>
+      <div class="success-msg" id="addOk">✅ Cliente añadido</div>
+    </div>
+    <div class="admin-section">
+      <h3>👥 Orden y servicio (${clients.length} clientes)</h3>
+      <div class="hint-box">▲ ▼ para ordenar · Pulsa el servicio para cambiarlo</div>
+      ${clientList}
+    </div>
+    <div class="admin-section">
+      <h3>📌 Nota del día</h3>
+      <textarea class="notes-edit-area" id="notesEdit">${routeData[adminDay]&&routeData[adminDay].notes||""}</textarea>
+      <button class="btn-primary" style="margin-top:8px" onclick="saveNotes()">💾 Guardar nota</button>
+      <div class="success-msg" id="notesOk">✅ Nota guardada</div>
+    </div>
+    <div class="admin-section">
+      <button class="btn-primary btn-red" onclick="if(confirm('¿Cerrar sesión?')){adminLoggedIn=false;closeAdmin()}">🔒 Cerrar sesión</button>
+    </div>`;
+}
+function setClientEr(idx,val){routeData[adminDay][adminRep][idx].er=val;db.ref("routes").set(routeData).then(()=>{renderAdminPanel();if(curRep!=="PLANTA")renderRuta();});}
+function moveClient(idx,dir){
+  const arr=routeData[adminDay][adminRep];const ni=idx+dir;
+  if(ni<0||ni>=arr.length) return;
+  const tmp=arr[idx];arr[idx]=arr[ni];arr[ni]=tmp;
+  syncSession();
+  db.ref("routes").set(routeData).then(()=>{renderAdminPanel();if(curRep!=="PLANTA")renderRuta();});
+}
+function addClient(){
+  const name=document.getElementById("newName").value.trim().toUpperCase();
+  const zone=document.getElementById("newZone").value.trim();
+  const er=document.getElementById("newEr").value;
+  if(!name){document.getElementById("newName").focus();return;}
+  if(!routeData[adminDay][adminRep]) routeData[adminDay][adminRep]=[];
+  routeData[adminDay][adminRep].push({name,zone:zone||"—",er});
+  syncSession();
+  db.ref("routes").set(routeData).then(()=>{
+    document.getElementById("addOk").classList.add("show");
+    setTimeout(()=>document.getElementById("addOk").classList.remove("show"),2000);
+    document.getElementById("newName").value="";document.getElementById("newZone").value="";
+    renderAdminPanel();if(curRep!=="PLANTA")renderRuta();
+  });
+}
+function deleteClient(idx){
+  const c=routeData[adminDay][adminRep][idx];
+  if(!confirm(`¿Eliminar "${c.name}"?`)) return;
+  routeData[adminDay][adminRep].splice(idx,1);syncSession();
+  db.ref("routes").set(routeData).then(()=>{renderAdminPanel();if(curRep!=="PLANTA")renderRuta();});
+}
+function saveNotes(){
+  routeData[adminDay].notes=document.getElementById("notesEdit").value.trim();
+  db.ref("routes").set(routeData).then(()=>{
+    document.getElementById("notesOk").classList.add("show");
+    setTimeout(()=>document.getElementById("notesOk").classList.remove("show"),2000);
+    if(curRep!=="PLANTA")renderRuta();
+  });
+}
+
+/* ========== HISTORIAL ========== */
+function openHist(){document.getElementById("histOverlay").classList.add("open");renderHist();}
+function closeHist(){document.getElementById("histOverlay").classList.remove("open");}
+function renderHist(){
+  document.getElementById("histBody").innerHTML=`
+    <div class="hist-filters">
+      <select id="histFilter" onchange="loadHist()">
+        <option value="week">Esta semana</option>
+        <option value="month">Este mes</option>
+        <option value="all">Todo el historial</option>
+      </select>
+      <select id="histRep" onchange="loadHist()">
+        <option value="all">Todos</option>
+        <option value="WILSON">Wilson</option>
+        <option value="JUAN">Juan</option>
+        <option value="PLANTA">Planta</option>
+      </select>
+    </div>
+    <div id="histContent"><div class="loading-msg">⏳ Cargando datos...</div></div>`;
+  loadHist();
+}
+function loadHist(){
+  const filter=document.getElementById("histFilter").value;
+  const rep=document.getElementById("histRep").value;
+  document.getElementById("histContent").innerHTML=`<div class="loading-msg">⏳ Cargando...</div>`;
+  db.ref("historial").once("value").then(snap=>{
+    const data=snap.val()||{};
+    const today=new Date();
+    const rows=[];
+    Object.entries(data).forEach(([fecha,reps])=>{
+      const d=new Date(fecha);
+      let inc=false;
+      if(filter==="all") inc=true;
+      else if(filter==="month") inc=d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth();
+      else if(filter==="week"){const w=new Date(today);w.setDate(today.getDate()-7);inc=d>=w&&d<=today;}
+      if(!inc) return;
+      Object.entries(reps).forEach(([r,clientes])=>{
+        if(rep!=="all"&&r!==rep) return;
+        Object.values(clientes).forEach(c=>rows.push({fecha,repartidor:r,...c}));
+      });
+    });
+    if(!rows.length){document.getElementById("histContent").innerHTML=`<div class="hist-empty">📭 Sin datos para este periodo</div>`;return;}
+    rows.sort((a,b)=>b.timestamp-a.timestamp);
+    const totalSacos=rows.reduce((a,r)=>a+(r.sacos||0),0);
+    const totalCRec=rows.reduce((a,r)=>a+(r.carrosRecogidos||0),0);
+    const totalCEnt=rows.reduce((a,r)=>a+(r.carrosEntregados||0),0);
+    const clientesUnicos=new Set(rows.map(r=>r.cliente)).size;
+    const byClient={};
+    rows.forEach(r=>{if(!byClient[r.cliente])byClient[r.cliente]={sacos:0,cRec:0,cEnt:0};byClient[r.cliente].sacos+=r.sacos||0;byClient[r.cliente].cRec+=r.carrosRecogidos||0;byClient[r.cliente].cEnt+=r.carrosEntregados||0;});
+    const ranking=Object.entries(byClient).sort((a,b)=>b[1].sacos-a[1].sacos).slice(0,5);
+    const rl=r=>r==="WILSON"?"W":r==="JUAN"?"J":r==="PLANTA"?"P":"?";
+    document.getElementById("histContent").innerHTML=`
+      <div class="hist-totals">
+        <div class="hist-total-card"><div class="hn">${totalSacos}</div><div class="hl">🧺 Sacos</div></div>
+        <div class="hist-total-card"><div class="hn">${totalCRec}</div><div class="hl">🛒 C.Recog.</div></div>
+        <div class="hist-total-card"><div class="hn">${totalCEnt}</div><div class="hl">📦 C.Entre.</div></div>
+        <div class="hist-total-card"><div class="hn">${clientesUnicos}</div><div class="hl">👥 Clientes</div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:#2E4057;margin-bottom:8px">🏆 Top clientes por sacos</div>
+        ${ranking.map(([n,d])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f8f8f8;border-radius:8px;margin-bottom:5px;font-size:12px"><span style="font-weight:600">${n}</span><span style="color:#888">🧺${d.sacos} 🛒${d.cRec} 📦${d.cEnt}</span></div>`).join('')}
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2E4057;margin-bottom:8px">📋 Registro detallado</div>
+      <div style="overflow-x:auto">
+        <table class="hist-table">
+          <thead><tr><th>Fecha</th><th>Cliente</th><th>Rep.</th><th>🧺</th><th>🛒</th><th>📦</th></tr></thead>
+          <tbody>${rows.map(r=>`<tr><td style="white-space:nowrap">${r.fecha}</td><td style="font-weight:600">${r.cliente}</td><td>${rl(r.repartidor)}</td><td>${r.sacos||0}</td><td>${r.carrosRecogidos||0}</td><td>${r.carrosEntregados||0}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  });
+}
+
+render();
+</script>
+</body>
+</html>
